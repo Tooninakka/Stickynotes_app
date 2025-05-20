@@ -1,13 +1,29 @@
 version: 0.2
 
+env:
+  parameter-store:
+    DOCKER_REGISTRY_USERNAME: /docker-creds/username
+    DOCKER_REGISTRY_PASSWORD: /docker-creds/password
+    DCOKER_REGISTRY_URL: /docker-registry/url
 phases:
   install:
     runtime-versions:
-      python: 3.8
+      python: 3.12
+  pre_build:
     commands:
+      - echo "Installing dependencies..."
       - pip install -r requirements.txt
   build:
     commands:
-      - echo "Running unit tests"
+      - echo "Running tests"
+      - echo "Building Docker Image"
+      - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY_URL"
+      - docker build -t "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/notes-python-flask-app:latest" .
+      - docker push "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/notes-python-flask-app:latest"
+  post_build:
+    commands:
+      - echo "Build Completed Successfully."
 artifacts:
-  file- '**/*'
+  files:
+    - '**/*'
+  base-directory: ../notes-python-app

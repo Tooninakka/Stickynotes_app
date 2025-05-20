@@ -1,5 +1,5 @@
 # Base image
-FROM python:alpine
+FROM python:3.12
 
 # Set the working directory inside the container
 WORKDIR /app
